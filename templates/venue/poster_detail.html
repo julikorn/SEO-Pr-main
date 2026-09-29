@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ poster.title }} — {{ poster.date|date:"j E Y" }} | Подземка{% endblock %}
+{% block description %}{{ poster.short_description }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ poster.title }} — {{ poster.date|date:"j E Y" }} | Подземка{% endblock %}
+{% block og_description %}{{ poster.short_description }}{% endblock %}
+{% block og_image %}{% if poster.image %}{{ request.scheme }}://{{ request.get_host }}{% static poster.image %}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/hall-depo.jpg' %}{% endif %}{% endblock %}
+{% block twitter_title %}{{ poster.title }} — {{ poster.date|date:"j E Y" }} | Подземка{% endblock %}
+{% block twitter_description %}{{ poster.short_description }}{% endblock %}
+{% block twitter_image %}{% if poster.image %}{{ request.scheme }}://{{ request.get_host }}{% static poster.image %}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/hall-depo.jpg' %}{% endif %}{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "{{ poster.title|escapejs }}",
+    "startDate": "{{ poster.date|date:'Y-m-d' }}{% if poster.time %}T{{ poster.time|time:'H:i' }}:00+09:00{% endif %}",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+    "description": "{{ poster.short_description|escapejs }}",
+    "image": "{% if poster.image %}{{ request.scheme }}://{{ request.get_host }}{% static poster.image %}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/hall-depo.jpg' %}{% endif %}",
+    "location": {
+      "@type": "Place",
+      "name": "{{ site.name }}",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "{{ site.street }}",
+        "addressLocality": "{{ site.city }}",
+        "addressRegion": "{{ site.region }}",
+        "postalCode": "{{ site.postal_code }}",
+        "addressCountry": "{{ site.country }}"
+      }
+    }{% if poster.organizer %},
+    "organizer": {
+      "@type": "Organization",
+      "name": "{{ poster.organizer|escapejs }}"
+    }{% endif %}{% if poster.schedule %},
+    "eventSchedule": {
+      "@type": "Schedule",
+      "repeatFrequency": "P1D",
+      "startTime": "{{ poster.time|time:'H:i' }}"
+    }{% endif %}
+  }
+  </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav class="container breadcrumbs mono" aria-label="Хлебные крошки">
+    <a href="{% url 'venue:home' %}">Главная</a> <span>/</span>
+    <a href="{% url 'venue:poster_list' %}">Афиша</a> <span>/</span>
+    <span>{{ poster.title }}</span>
+  </nav>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Главная",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Афиша",
+        "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'venue:poster_list' %}"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "{{ poster.title|escapejs }}",
+        "item": "{{ request.scheme }}://{{ request.get_host }}{{ poster.get_absolute_url }}"
+      }
+    ]
+  }
+  </script>
+{% endblock %}
+
+{% block content %}
+<section class="section section--tight">
+  <div class="container poster">
+    <div class="poster__img">
+      {% if poster.schedule %}
+        <span class="date-badge date-badge--regular"><b>{% if poster.time %}{{ poster.time|time:"H:i" }}{% else %}∞{% endif %}</b><span>{{ poster.schedule }}</span></span>
+      {% else %}
+        <span class="date-badge"><b>{{ poster.date|date:"d" }}</b><span>{{ poster.date|date:"b" }}</span></span>
+      {% endif %}
+      {% if poster.image %}
+        <img src="{% static poster.image %}"
+             alt="{{ poster.title }} — {{ poster.short_description|truncatechars:60 }}"
+             width="800" height="600" loading="lazy">
+      {% endif %}
+    </div>
+
+    <div class="poster__info">
+      {% if is_past %}<p class="poster__past mono">Событие уже прошло</p>{% endif %}
+      {% if poster.topic %}<p class="mono" style="color: var(--neon)">Тема: {{ poster.topic }}</p>{% endif %}
+      <h1 class="poster__title">{{ poster.title }}</h1>
+      <p class="hall-hero__lead">{{ poster.short_description }}</p>
+
+      <dl class="poster__facts">
+        {% if poster.schedule %}
+          <div><dt class="mono">Когда</dt><dd>{{ poster.schedule }}, начиная с {{ poster.date|date:"j E Y" }}</dd></div>
+        {% else %}
+          <div><dt class="mono">Дата</dt><dd>{{ poster.date|date:"j E Y, l" }}</dd></div>
+        {% endif %}
+        <div><dt class="mono">Начало</dt><dd>{% if poster.time %}{{ poster.time|time:"H:i" }}{% else %}Время уточняйте по телефону <a href="tel:{{ site.phone_raw }}">{{ site.phone }}</a>{% endif %}</dd></div>
+        {% if poster.topic %}<div><dt class="mono">Тема</dt><dd>{{ poster.topic }}</dd></div>{% endif %}
+        {% if poster.organizer %}<div><dt class="mono">Организатор</dt><dd>{{ poster.organizer }}</dd></div>{% endif %}
+        <div><dt class="mono">Место</dt><dd>{{ site.name }}, {{ site.address }}</dd></div>
+      </dl>
+
+      <div class="poster__text">{{ poster.description|linebreaks }}</div>
+
+      {% if not is_past %}
+        <a href="{% url 'venue:booking' %}?comment={{ poster.title|urlencode }}{% if not poster.schedule %}%2C%20{{ poster.date|date:'d.m.Y'|urlencode }}{% endif %}" class="btn btn--neon">Забронировать стол</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

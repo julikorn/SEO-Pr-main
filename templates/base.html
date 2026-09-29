@@ -1,0 +1,127 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="any">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+  <meta name="theme-color" content="#0d0d0d">
+
+  <title>{% block title %}Подземка — банкетный зал в Чите{% endblock %}</title>
+  <meta name="description" content="{% block description %}Банкетный зал «Подземка» в Чите: лофт-андеграунд, 4 зала, банкеты до 120 гостей. Меню, афиша, бронирование онлайн.{% endblock %}">
+
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:site_name" content="{{ site.name }}">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:title" content="{% block og_title %}Подземка — банкетный зал в Чите{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Банкетный зал «Подземка» в Чите: лофт-андеграунд, 4 зала, банкеты до 120 гостей.{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/hall-depo.jpg' %}{% endblock %}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block twitter_title %}Подземка — банкетный зал в Чите{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}Банкетный зал «Подземка» в Чите: лофт-андеграунд, 4 зала, банкеты до 120 гостей.{% endblock %}">
+  <meta name="twitter:image" content="{% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/hall-depo.jpg' %}{% endblock %}">
+
+  {% block robots %}{% endblock %}
+
+  <meta name="yandex-verification" content="ВАШ_КОД_ЯНДЕКСА">
+  <meta name="google-site-verification" content="ВАШ_КОД_GOOGLE">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "EventVenue",
+    "name": "{{ site.name }}",
+    "description": "{{ site.tagline }}. Банкетный зал в стиле лофт и андеграунд в Чите: 4 зала, свадьбы, корпоративы, концерты.",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/",
+    "telephone": "{{ site.phone_raw }}",
+    "image": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/hall-depo.jpg' %}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ site.street }}",
+      "addressLocality": "{{ site.city }}",
+      "addressRegion": "{{ site.region }}",
+      "postalCode": "{{ site.postal_code }}",
+      "addressCountry": "{{ site.country }}"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "{{ site.geo.lat }}",
+      "longitude": "{{ site.geo.lon }}"
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+      "opens": "12:00",
+      "closes": "02:00"
+    },
+    "sameAs": [
+      "{{ site.telegram }}",
+      "{{ site.vk }}"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "{{ site.name }}",
+    "legalName": "{{ site.legal_name }}",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/",
+    "email": "{{ site.email }}",
+    "telephone": "{{ site.phone_raw }}",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ site.street }}",
+      "addressLocality": "{{ site.city }}",
+      "addressRegion": "{{ site.region }}",
+      "postalCode": "{{ site.postal_code }}",
+      "addressCountry": "{{ site.country }}"
+    },
+    "sameAs": [
+      "{{ site.telegram }}",
+      "{{ site.vk }}"
+    ]
+  }
+  </script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <div class="noise" aria-hidden="true"></div>
+
+  {% include "includes/header.html" %}
+
+  <main id="main">
+    {% if messages %}
+      <div class="container">
+        {% for message in messages %}
+          <div class="alert alert--{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block breadcrumbs %}{% endblock %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "includes/footer.html" %}
+
+  <script src="{% static 'js/main.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Страница не найдена — 404 | Подземка{% endblock %}
+{% block description %}Такой страницы нет. Вернитесь на главную или выберите зал в «Подземке».{% endblock %}
+{% block robots %}<meta name="robots" content="noindex, follow">{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <p class="mono muted">Ошибка 404</p>
+    <h1 class="page-head__title">Такой станции нет</h1>
+    <p class="muted">Возможно, страница переехала или вы ошиблись в адресе.</p>
+    <p>
+      <a href="{% url 'venue:home' %}" class="btn btn--neon">На главную</a>
+      <a href="{% url 'venue:hall_list' %}" class="btn btn--ghost">Выбрать зал</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

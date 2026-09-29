@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Контакты — банкетный зал «Подземка» в Чите{% endblock %}
+{% block description %}Адрес банкетного зала «Подземка»: улица Курнатовского, 17, Чита. Телефон, время работы, карта проезда. Запишитесь на экскурсию по залу.{% endblock %}
+
+{% block og_title %}Контакты — банкетный зал «Подземка» в Чите{% endblock %}
+{% block og_description %}Адрес: улица Курнатовского, 17, Чита. Телефон, время работы, карта проезда.{% endblock %}
+{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/hall-depo.jpg' %}{% endblock %}
+
+{% block twitter_title %}Контакты — банкетный зал «Подземка» в Чите{% endblock %}
+{% block twitter_description %}Адрес: улица Курнатовского, 17, Чита. Телефон и время работы.{% endblock %}
+{% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/hall-depo.jpg' %}{% endblock %}
+
+{% block extra_head %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Главная",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Контакты",
+        "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'venue:contacts' %}"
+      }
+    ]
+  }
+  </script>
+{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <p class="mono muted">Как добраться</p>
+    <h1 class="page-head__title">Контакты банкетного зала «Подземка» в Чите</h1>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container contacts">
+    <div class="contacts__info">
+      <dl class="contacts__list">
+        <div><dt class="mono">Адрес</dt><dd>{{ site.address }}</dd></div>
+        <div><dt class="mono">Где это</dt><dd><span class="metro-badge">П</span> {{ site.city }}, {{ site.region }}</dd></div>
+        <div><dt class="mono">Телефон</dt><dd><a href="tel:{{ site.phone_raw }}">{{ site.phone }}</a></dd></div>
+        <div><dt class="mono">E-mail</dt><dd><a href="mailto:{{ site.email }}">{{ site.email }}</a></dd></div>
+        <div><dt class="mono">Время работы</dt><dd>{{ site.hours }}</dd></div>
+        <div><dt class="mono">Реквизиты</dt><dd>{{ site.legal_name }}</dd></div>
+      </dl>
+      <a href="{% url 'venue:booking' %}" class="btn btn--neon">Записаться на экскурсию</a>
+    </div>
+
+    <div class="contacts__map">
+      <div class="map-embed">
+        <a href="https://yandex.ru/maps/68/chita/?utm_medium=mapframe&utm_source=maps" class="map-embed__credit">Чита</a>
+        <a href="https://yandex.ru/maps/68/chita/house/ulitsa_kurnatovskogo_17/ZUgFaANpSkUCWEJvYWJxcnlmZwg=/?ll=113.493054%2C52.035530&utm_medium=mapframe&utm_source=maps&z=16" class="map-embed__credit map-embed__credit--2">Улица Курнатовского, 17 на карте Читы — Яндекс Карты</a>
+        <iframe src="https://yandex.ru/map-widget/v1/?ll=113.493054%2C52.035530&mode=whatshere&whatshere%5Bpoint%5D=113.493054%2C52.035530&whatshere%5Bzoom%5D=17&z=16"
+                allowfullscreen="true"
+                loading="lazy"
+                title="Банкетный зал «Подземка» на карте Читы — улица Курнатовского, 17"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

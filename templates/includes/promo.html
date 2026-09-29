@@ -1,0 +1,28 @@
+{% load static %}
+{% if promo %}
+<section class="promo" id="promo">
+  <div class="container promo__inner">
+    <div class="promo__photo">
+      <img src="{% static promo.host_photo %}"
+           alt="Ведущий {{ promo.host_name }} — тамада на выпускной в «Подземке»"
+           width="600" height="400" loading="lazy">
+      <span class="promo__badge">−{{ promo.discount }}%</span>
+    </div>
+
+    <div class="promo__text">
+      <p class="mono promo__kicker">Акция до {{ promo.until_human }}</p>
+      <h2 class="section__title">{{ promo.title }}</h2>
+      <p class="promo__lead">Забронируйте зал на выпускной до&nbsp;{{ promo.until_human }} и&nbsp;получите <b>скидку {{ promo.discount }}% на&nbsp;тамаду</b>.</p>
+      <div class="promo__host">
+        <span class="mono muted">Ведущий вечера</span>
+        <strong>{{ promo.host_name }}</strong>
+      </div>
+      <p class="muted promo__note">* Скидка действует только на нашего тамаду — {{ promo.host_name }}а. Акция распространяется на бронирования, оформленные до {{ promo.until_human }} включительно.</p>
+      <div class="promo__actions">
+        <a href="{% url 'venue:booking' %}" class="btn btn--neon">Забронировать выпускной</a>
+        <span class="promo__timer mono" data-countdown="{{ promo.until }}"></span>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}

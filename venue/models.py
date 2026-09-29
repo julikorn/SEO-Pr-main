@@ -1,0 +1,176 @@
+from django.db import models
+from django.urls import reverse
+
+class Hall(models.Model):
+    name = models.CharField("Название", max_length=100)
+    slug = models.SlugField(
+        "URL", max_length=120, unique=True, blank=True,
+        help_text="Человекопонятный URL, например: depo, tonnel, platforma",
+    )
+
+    line_color = models.CharField(
+        "Цвет линии (HEX)", max_length=7, default="#e4312b",
+        help_text="Цвет «ветки метро» для зала, например #e4312b",
+    )
+    line_number = models.PositiveSmallIntegerField("Номер линии", default=1)
+    short_description = models.CharField("Короткое описание", max_length=255)
+    description = models.TextField("Полное описание")
+    capacity_banquet = models.PositiveIntegerField("Вместимость (банкет)")
+    capacity_buffet = models.PositiveIntegerField("Вместимость (фуршет)")
+    area = models.PositiveIntegerField("Площадь, м²")
+    price_from = models.PositiveIntegerField("Цена от, ₽/гость")
+    features = models.TextField(
+        "Особенности", blank=True,
+        help_text="Каждая особенность — с новой строки",
+    )
+    image = models.CharField(
+        "Картинка (путь в static)", max_length=200, default="img/hall-depo.jpg",
+    )
+
+    meta_title = models.CharField("Meta Title", max_length=70, blank=True)
+    meta_description = models.CharField("Meta Description", max_length=160, blank=True)
+
+    order = models.PositiveSmallIntegerField("Порядок", default=0)
+    is_active = models.BooleanField("Показывать на сайте", default=True)
+
+    class Meta:
+        verbose_name = "Зал"
+        verbose_name_plural = "Залы"
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        # После добавления slug используем его в URL.
+        return reverse("venue:hall_detail", kwargs={"slug": self.slug})
+
+    def features_list(self):
+        return [f.strip() for f in self.features.splitlines() if f.strip()]
+
+class EventFormat(models.Model):
+    title = models.CharField("Название", max_length=100)
+    icon = models.CharField("Иконка (эмодзи или символ)", max_length=8, default="◆")
+    description = models.TextField("Описание")
+    order = models.PositiveSmallIntegerField("Порядок", default=0)
+
+    class Meta:
+        verbose_name = "Формат мероприятия"
+        verbose_name_plural = "Форматы мероприятий"
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.title
+
+class MenuPackage(models.Model):
+
+    name = models.CharField("Название", max_length=100)
+    description = models.CharField("Описание", max_length=255)
+    price_per_person = models.PositiveIntegerField("Цена, ₽/гость")
+    items = models.TextField("Состав", help_text="Каждая позиция — с новой строки")
+    is_featured = models.BooleanField("Хит", default=False)
+    order = models.PositiveSmallIntegerField("Порядок", default=0)
+
+    class Meta:
+        verbose_name = "Банкетное меню"
+        verbose_name_plural = "Банкетные меню"
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.name
+
+    def items_list(self):
+        return [i.strip() for i in self.items.splitlines() if i.strip()]
+
+class Review(models.Model):
+    author = models.CharField("Имя", max_length=100)
+    event = models.CharField("Мероприятие", max_length=100, blank=True)
+    text = models.TextField("Текст отзыва")
+    rating = models.PositiveSmallIntegerField("Оценка (1-5)", default=5)
+    created_at = models.DateField("Дата")
+    is_published = models.BooleanField("Опубликован", default=True)
+
+    class Meta:
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.author} — {self.rating}★"
+
+class FAQ(models.Model):
+    question = models.CharField("Вопрос", max_length=255)
+    answer = models.TextField("Ответ")
+    order = models.PositiveSmallIntegerField("Порядок", default=0)
+
+    class Meta:
+        verbose_name = "Вопрос-ответ"
+        verbose_name_plural = "Вопросы и ответы"
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.question
+
+class BookingRequest(models.Model):
+
+    STATUS_CHOICES = [
+        ("new", "Новая"),
+        ("in_work", "В работе"),
+        ("done", "Подтверждена"),
+        ("cancel", "Отменена"),
+    ]
+
+    name = models.CharField("Имя", max_length=100)
+    phone = models.CharField("Телефон", max_length=30)
+    date = models.DateField("Дата мероприятия")
+    guests = models.PositiveIntegerField("Количество гостей")
+    hall = models.ForeignKey(
+        Hall, verbose_name="Зал", on_delete=models.SET_NULL, null=True, blank=True,
+    )
+    event_format = models.ForeignKey(
+        EventFormat, verbose_name="Формат", on_delete=models.SET_NULL, null=True, blank=True,
+    )
+    comment = models.TextField("Комментарий", blank=True)
+    status = models.CharField("Статус", max_length=10, choices=STATUS_CHOICES, default="new")
+    created_at = models.DateTimeField("Создана", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Заявка"
+        verbose_name_plural = "Заявки"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name}, {self.date:%d.%m.%Y}, {self.guests} гостей"
+
+class Poster(models.Model):
+
+    title = models.CharField("Название", max_length=150)
+
+    slug = models.SlugField(
+        "URL", max_length=150, unique=True, blank=True,
+        help_text="Человекопонятный URL, например: kviz-60-sekund",
+    )
+
+    topic = models.CharField("Тема", max_length=150, blank=True)
+    organizer = models.CharField("Организатор", max_length=150, blank=True)
+    date = models.DateField("Дата", help_text="Для регулярного события — дата первого проведения")
+    time = models.TimeField("Время начала", null=True, blank=True)
+    schedule = models.CharField(
+        "Регулярность", max_length=100, blank=True,
+        help_text="Например «Каждое утро». Если заполнено, событие не пропадает из афиши после даты.",
+    )
+    short_description = models.CharField("Короткое описание", max_length=255)
+    description = models.TextField("Описание", blank=True)
+    image = models.CharField("Картинка (путь в static)", max_length=200, blank=True)
+    is_published = models.BooleanField("Опубликовано", default=True)
+
+    class Meta:
+        verbose_name = "Событие афиши"
+        verbose_name_plural = "Афиша"
+        ordering = ["date", "time"]
+
+    def __str__(self):
+        return f"{self.title} ({self.date:%d.%m.%Y})"
+
+    def get_absolute_url(self):
+        return reverse("venue:poster_detail", kwargs={"slug": self.slug})
