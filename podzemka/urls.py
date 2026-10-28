@@ -16,5 +16,6 @@ urlpatterns = [
     )),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps},
          name="django.contrib.sitemaps.views.sitemap"),
+    path("", include("django_prometheus.urls")),
     path("", include("venue.urls")),
 ]

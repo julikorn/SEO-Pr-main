@@ -42,7 +42,6 @@ class Hall(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        # После добавления slug используем его в URL.
         return reverse("venue:hall_detail", kwargs={"slug": self.slug})
 
     def features_list(self):

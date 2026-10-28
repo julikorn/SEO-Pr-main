@@ -1,3 +1,5 @@
+import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 import os
 from pathlib import Path
 
@@ -10,9 +12,21 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "*"]
+if not DEBUG and SECRET_KEY.startswith("dev-only"):
+    raise ImproperlyConfigured("Задайте DJANGO_SECRET_KEY в переменных окружения")
+
+
+def env_list(name, default=""):
+    """Читает список из переменной окружения: "a,b,c" -> ["a", "b", "c"]."""
+    return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
+
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost")
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 INSTALLED_APPS = [
+    "django_prometheus",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -24,6 +38,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -31,6 +46,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "podzemka.urls"
@@ -54,10 +70,10 @@ TEMPLATES = [
 WSGI_APPLICATION = "podzemka.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=60,
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -76,13 +92,22 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+if os.environ.get("DJANGO_STATIC_MANIFEST") == "1":
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"},
+    }
+
+UMAMI_WEBSITE_ID = os.environ.get("UMAMI_WEBSITE_ID", "")
+UMAMI_SCRIPT_URL = os.environ.get("UMAMI_SCRIPT_URL", "http://localhost:3000/script.js")
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SITE_INFO = {
     "name": "Подземка",
     "tagline": "Банкетный зал в стиле лофт и андеграунд",
     "legal_name": "ИП Анисимов Игорь Владимирович",
-    "domain": "podzemka.example",
+    "domain": os.environ.get("SITE_DOMAIN", "podzemka.example"),
     "phone": "+7 (900) 123-45-67",
     "phone_raw": "+79001234567",
     "email": "hello@podzemka.example",

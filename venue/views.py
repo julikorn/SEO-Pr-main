@@ -1,3 +1,5 @@
+from django.http import JsonResponse
+from django.db import connection
 import datetime
 from django.contrib import messages
 from django.db.models import Avg, Q
@@ -97,3 +99,9 @@ def booking(request):
             "guests": request.GET.get("guests"),
         })
     return render(request, "venue/booking.html", {"form": form})
+
+def healthz(request):
+    """DEVOPS: проверка «жив ли сайт» для Docker и мониторинга. Ходит в БД."""
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1")
+    return JsonResponse({"status": "ok"})

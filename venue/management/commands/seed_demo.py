@@ -1,3 +1,4 @@
+from django.utils.text import slugify
 import datetime
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
@@ -7,6 +8,7 @@ from venue.models import FAQ, EventFormat, Hall, MenuPackage, Poster, Review
 HALLS = [
     {
         "name": "Депо",
+        "slug": "depo",
         "line_number": 1,
         "line_color": "#e4312b",
         "short_description": "Главный зал с кирпичными сводами, сценой и световой фермой.",
@@ -30,6 +32,7 @@ HALLS = [
     },
     {
         "name": "Тоннель",
+        "slug": "tonnel",
         "line_number": 2,
         "line_color": "#f28c28",
         "short_description": "Длинный камерный зал-тоннель с арочным потолком и неоном.",
@@ -50,6 +53,7 @@ HALLS = [
     },
     {
         "name": "Платформа",
+        "slug": "platforma",
         "line_number": 3,
         "line_color": "#3aa655",
         "short_description": "Самое большое пространство: две зоны, бар и танцпол.",
@@ -71,6 +75,7 @@ HALLS = [
     },
     {
         "name": "Вестибюль",
+        "slug": "vestibyul",
         "line_number": 4,
         "line_color": "#8e5bd6",
         "short_description": "Барное пространство для фуршетов, афтепати и welcome-зоны.",
@@ -220,6 +225,12 @@ POSTERS = [
 def seed_posters(stdout, style):
     created = 0
     for data in POSTERS:
+        if "slug" not in data:
+            base_slug = slugify(data["title"], allow_unicode=False)
+            if not base_slug:
+                base_slug = "poster"
+            data["slug"] = f"{base_slug}-{data['date'].strftime('%Y%m%d')}"
+
         _, is_new = Poster.objects.get_or_create(title=data["title"], date=data["date"], defaults=data)
         created += is_new
     if created:
@@ -255,19 +266,23 @@ class Command(BaseCommand):
 
         for data in HALLS:
             Hall.objects.create(**data)
+            
         for i, (title, icon, desc) in enumerate(FORMATS):
             EventFormat.objects.create(title=title, icon=icon, description=desc, order=i)
+            
         for i, (name, desc, price, featured, items) in enumerate(PACKAGES):
             MenuPackage.objects.create(
                 name=name, description=desc, price_per_person=price,
                 is_featured=featured, items=items, order=i,
             )
+            
         today = datetime.date.today()
         for author, event, text, rating, days_ago in REVIEWS:
             Review.objects.create(
                 author=author, event=event, text=text, rating=rating,
                 created_at=today - datetime.timedelta(days=days_ago),
             )
+            
         for i, (q, a) in enumerate(FAQS):
             FAQ.objects.create(question=q, answer=a, order=i)
 
