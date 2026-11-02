@@ -65,10 +65,10 @@ class PromoAndPosterTest(SiteTestCase):
 
     def test_past_poster_not_listed_but_regular_is(self):
         past = Poster.objects.create(
-            title="Прошедшее", date=datetime.date(2020, 1, 1), short_description="-",
+            title="Прошедшее", date=datetime.date(2020, 1, 1), short_description="-", slug="test-past-poster",
         )
         regular = Poster.objects.create(
-            title="Регулярное", date=datetime.date(2020, 1, 1), schedule="Каждый день", short_description="-",
+            title="Регулярное", date=datetime.date(2020, 1, 1), schedule="Каждый день", short_description="-", slug="test-regular-poster",
         )
         posters = list(self.client.get(reverse("venue:poster_list")).context["posters"])
         self.assertNotIn(past, posters)
