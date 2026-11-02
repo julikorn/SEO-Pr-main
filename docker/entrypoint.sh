@@ -1,4 +1,3 @@
-#!/bin/sh
 set -e
 
 if [ "$1" = "gunicorn" ]; then

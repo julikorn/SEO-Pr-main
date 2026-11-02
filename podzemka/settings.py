@@ -1,3 +1,4 @@
+import sys
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 import os
@@ -92,7 +93,12 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-if os.environ.get("DJANGO_STATIC_MANIFEST") == "1":
+if 'test' in sys.argv:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+elif os.environ.get("DJANGO_STATIC_MANIFEST") == "1":
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"},
